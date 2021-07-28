@@ -1,3 +1,7 @@
+MYSQL_USER		= "user"
+MYSQL_PASSWORD	= "pass"
+MYSQL_DATABASE	= "database"
+
 up:
 	docker-compose up -d
 build:
@@ -20,14 +24,6 @@ create-project-git-bash:
 	winpty docker-compose exec web php artisan key:generate
 	winpty docker-compose exec web php artisan storage:link
 	@make fresh-git-bash
-install-recommend-packages:
-	docker-compose exec web composer require doctrine/dbal
-	docker-compose exec web composer require --dev barryvdh/laravel-ide-helper
-	docker-compose exec web composer require --dev beyondcode/laravel-dump-server
-	docker-compose exec web composer require --dev barryvdh/laravel-debugbar
-	docker-compose exec web composer require --dev roave/security-advisories:dev-master
-	docker-compose exec web php artisan vendor:publish --provider="BeyondCode\DumpServer\DumpServerServiceProvider"
-	docker-compose exec web php artisan vendor:publish --provider="Barryvdh\Debugbar\ServiceProvider"
 init:
 	docker-compose up -d --build
 	docker-compose exec web composer install
@@ -41,7 +37,7 @@ remake:
 stop:
 	docker-compose stop
 down:
-	docker-compose down --remove-orphans
+	docker-compose down
 restart:
 	@make down
 	@make up
@@ -53,20 +49,6 @@ ps:
 	docker-compose ps
 logs:
 	docker-compose logs
-logs-watch:
-	docker-compose logs --follow
-log-web:
-	docker-compose logs web
-log-web-watch:
-	docker-compose logs --follow web
-log-app:
-	docker-compose logs app
-log-app-watch:
-	docker-compose logs --follow app
-log-db:
-	docker-compose logs db
-log-db-watch:
-	docker-compose logs --follow db
 web:
 	docker-compose exec web bash
 migrate:
@@ -80,8 +62,6 @@ seed:
 rollback-test:
 	docker-compose exec web php artisan migrate:fresh
 	docker-compose exec web php artisan migrate:refresh
-tinker:
-	docker-compose exec web php artisan tinker
 test:
 	docker-compose exec web php artisan test
 optimize:
@@ -105,10 +85,6 @@ npm-dev:
 	docker-compose exec web npm run dev
 npm-watch:
 	docker-compose exec web npm run watch
-npm-watch-poll:
-	docker-compose exec web npm run watch-poll
-npm-hot:
-	docker-compose exec web npm run hot
 yarn:
 	docker-compose exec web yarn
 yarn-install:
@@ -117,18 +93,9 @@ yarn-dev:
 	docker-compose exec web yarn dev
 yarn-watch:
 	docker-compose exec web yarn watch
-yarn-watch-poll:
-	docker-compose exec web yarn watch-poll
-yarn-hot:
-	docker-compose exec web yarn hot
 db:
 	docker-compose exec db bash
 sql:
-	docker-compose exec db bash -c 'mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD $$MYSQL_DATABASE'
+	docker-compose exec db bash -c 'mysql -u $(MYSQL_USER) -p $(MYSQL_PASSWORD) $(MYSQL_DATABASE)'
 redis:
 	docker-compose exec redis redis-cli
-ide-helper:
-	docker-compose exec web php artisan clear-compiled
-	docker-compose exec web php artisan ide-helper:generate
-	docker-compose exec web php artisan ide-helper:meta
-	docker-compose exec web php artisan ide-helper:models --nowrite
